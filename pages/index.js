@@ -23,16 +23,34 @@ function HomePage(props) {
   return <MeetupList meetups={props.meetups} />;
 }
 
+// SSG
 export async function getStaticProps() {
+  //fetch data
   return {
     props: {
       meetups: DUMMY_MEETUPS,
     },
+    revalidate: 1, //incremental static generation
   };
 }
+
+// // SSR
+// export async function getServerSideProps(context) {
+//   const req = context.req;
+//   const res = context.res;
+
+//   //fetch data
+//   return {
+//     props: {
+//       meetups: DUMMY_MEETUPS,
+//     },
+//   };
+// }
 
 export default HomePage;
 
 // nextjs prerendering options:
 // 1. static generation: on build
-// 2.
+// catch: data could be outdated
+// 2. sever side rendering (ssr)
+// use it for frequent data changes
