@@ -1,34 +1,44 @@
+import Head from 'next/head';
+import { MongoClient } from 'mongodb';
+
 import MeetupList from '../components/meetups/MeetupList';
 
-const DUMMY_MEETUPS = [
-  {
-    id: 'm1',
-    title: 'First meetup',
-    image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/1500_block_of_Corcoran_Street%2C_N.W..JPG/2560px-1500_block_of_Corcoran_Street%2C_N.W..JPG',
-    address: 'some address',
-    description: 'this is a first meetup',
-  },
-  {
-    id: 'm2',
-    title: 'Second meetup',
-    image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/1500_block_of_Corcoran_Street%2C_N.W..JPG/2560px-1500_block_of_Corcoran_Street%2C_N.W..JPG',
-    address: 'some address',
-    description: 'this is a second meetup',
-  },
-];
-
 function HomePage(props) {
-  return <MeetupList meetups={props.meetups} />;
+  return (
+    <>
+      <Head>
+        <title>Nextjs Meetups</title>
+        <meta
+          name="description"
+          content="Browse a huge list of highly active Nextjs meetups"
+        />
+      </Head>
+      <MeetupList meetups={props.meetups} />;
+    </>
+  );
 }
 
 // SSG
 export async function getStaticProps() {
-  //fetch data
+  const client = await MongoClient.connect(
+    'mongodb+srv://jydndev:SGkrfjlgrd47MWAe@cluster0.xij6vv5.mongodb.net/meetups?retryWrites=true&w=majority&appName=Cluster0'
+  );
+
+  const db = client.db();
+
+  const collection = db.collection('meetups');
+
+  const meetups = await collection.find().toArray();
+
+  client.close();
+
   return {
     props: {
-      meetups: DUMMY_MEETUPS,
+      meetups: meetups.map((meetup) => ({
+        title: meetup.title,
+        address: meetup.address,
+        image: meetup.image,
+      })),
     },
     revalidate: 1, //incremental static generation
   };
